@@ -7,6 +7,7 @@ use axum::extract::{Path, Query};
 use axum::routing::{get, get_service};
 use serde::Deserialize;
 use tower_http::services::ServeDir;
+use tower_cookies::CookieManagerLayer;
 
 pub use self::error::{Error, Result};
 
@@ -19,6 +20,7 @@ async fn main() {
         .merge(routes_hello())
         .merge(web::routes_login::routes())
         .layer(middleware:: map_response(main_response_mapper))
+        .layer(CookieManagerLayer::new())
         .fallback_service(routes_static());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
