@@ -10,11 +10,7 @@ use serde::Deserialize;
 #[tokio::main]
 async fn main() {
     let routes_hello = Router::new()
-        .route(
-            "/hello",
-            get(handler_hello),
-        )
-        .route("/hello/:name", get(handler_hello2));
+        .merge(routes_hello());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("->> Listening on {addr} \n");
@@ -24,6 +20,11 @@ async fn main() {
         .unwrap();
 }
 
+fn routes_hello() -> Router {
+    Router::new()
+        .route("/hello", get(handler_hello))
+        .route("/hello/:name", get(handler_hello2))
+}
 #[derive(Debug, Deserialize)]
 struct HelloParams {
     name: Option<String>
