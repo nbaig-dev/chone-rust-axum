@@ -3,7 +3,9 @@
 use std::net::SocketAddr;
 use axum::response::{Html, IntoResponse};
 use axum::{Router, ServiceExt};
+use axum::extract::{Path, Query};
 use axum::routing::get;
+use serde::Deserialize;
 
 #[tokio::main]
 async fn main() {
@@ -11,7 +13,8 @@ async fn main() {
         .route(
             "/hello",
             get(handler_hello),
-        );
+        )
+        .route("/hello/:name", get(handler_hello2));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("->> Listening on {addr} \n");
@@ -21,7 +24,21 @@ async fn main() {
         .unwrap();
 }
 
-async fn handler_hello() -> impl IntoResponse {
-    println!("->> {:<12} - handler_hello", "HANDLER");
-    Html("Hello <strong>World!</strong>")
+#[derive(Debug, Deserialize)]
+struct HelloParams {
+    name: Option<String>
+}
+
+// eg: `hello?name=Nishat`
+async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
+    println!("->> {:<12} - handler_hello - {params:?}", "HANDLER");
+
+    let name = params.name.as_deref().unwrap_or("World!");
+    Html(format!("Hello <strong>{name}</strong>"))
+}
+
+// eg: `hello/Nishat`
+async fn handler_hello2(Path(name): Path<String>) -> impl IntoResponse {
+    println!("->> {:<12} - handler_hello2 - {name:?}", "HANDLER");
+    Html(format!("Hello <strong>{name}</strong>"))
 }
