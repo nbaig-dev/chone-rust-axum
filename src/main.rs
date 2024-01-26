@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 use std::net::SocketAddr;
-use axum::response::Html;
+use axum::response::{Html, IntoResponse};
 use axum::{Router, ServiceExt};
 use axum::routing::get;
 
@@ -10,7 +10,7 @@ async fn main() {
     let routes_hello = Router::new()
         .route(
             "/hello",
-            get(|| async {Html("Hello <strong>World!</strong>")}),
+            get(handler_hello),
         );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -19,4 +19,9 @@ async fn main() {
         .serve(routes_hello.into_make_service())
         .await
         .unwrap();
+}
+
+async fn handler_hello() -> impl IntoResponse {
+    println!("->> {:<12} - handler_hello", "HANDLER");
+    Html("Hello <strong>World!</strong>")
 }
