@@ -17,5 +17,16 @@ async fn quick_dev() -> Result<()> {
             "pwd": "welcome"
         })
     ).await?.print().await?;
+
+    hc.do_post(
+        "/api/tickets",
+        json!({
+            "title": "Ticket AAA"
+        }),
+    ).await?.print().await?;
+
+    hc.do_delete("/api/tickets/1",).await?.print().await?;
+    hc.do_get("/api/tickets",).await?.print().await?;
+
     Ok(())
 }
