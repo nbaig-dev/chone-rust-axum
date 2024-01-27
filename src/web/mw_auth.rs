@@ -11,19 +11,13 @@ use lazy_regex::regex_captures;
 use crate::ctx::Ctx;
 
 pub async fn mw_require_auth<B>(
-    cookies: Cookies,
+    ctx: Result<Ctx>,
     req: Request<B>,
     next: Next<B>
 ) -> Result<Response> {
-    println!("->> {:<12} - mw_require_auth", "MIDDLEWARE");
-    let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.value().to_string());
+    println!("->> {:<12} - mw_require_auth - {crx:?}", "MIDDLEWARE");
 
-    //Parse token.
-    let (user_id, exp, sign) = auth_token
-        .ok_or(Error::AuthFailNotAuthTokenCookie)
-        .and_then(parse_token)?;
-
-    // TODO: Token components validation.
+    ctx?;
 
     Ok(next.run(req).await)
 }
@@ -45,6 +39,8 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
             .ok_or(Error::AuthFailNotAuthTokenCookie)
             .and_then(parse_token)?;
 
+        // TODO: Token components validation.
+
         Ok(Ctx::new(user_id))
     }
 }
@@ -61,10 +57,6 @@ fn parse_token(token: String) -> Result<(u64, String, String)> {
     let user_id: u64 = user_id
         .parse()
         .map_err(|_| Error::AuthFailTokenWrongFormat)?;
-
-    // let user_id: u64 = user_id
-    //     .parse()
-    //     .map_err(|_| Error::AuthFailTokenWrongFormat)?;
 
     Ok((user_id, exp.to_string(), sign.to_string()))
 }
