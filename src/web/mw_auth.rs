@@ -2,7 +2,7 @@ use axum::extract::{FromRequestParts, State};
 use axum::http::Request;
 use axum::http::request::Parts;
 use axum::middleware::Next;
-use axum::{async_trait, RequestPartsExt};
+use axum::{async_trait};
 use axum::response::Response;
 use tower_cookies::{Cookie, Cookies};
 use crate::web::AUTH_TOKEN;
